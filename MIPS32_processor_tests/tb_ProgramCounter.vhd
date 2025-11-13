@@ -1,6 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+use std.env.all; -- <--- CORREÇÃO 1: Adicionar biblioteca 'env'
 
 entity tb_ProgramCounter is
 end tb_ProgramCounter;
@@ -14,7 +15,8 @@ architecture testbench of tb_ProgramCounter is
     end component;
 
     signal clk, reset : STD_LOGIC := '0';
-    signal pc_in, pc_out : STD_LOGIC_VECTOR(31 downto 0);
+    -- CORREÇÃO 2: Inicializar pc_in para evitar 'XXX'
+    signal pc_in, pc_out : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
     constant CLK_PERIOD : time := 10 ns;
 begin
     -- Instantiate the Unit Under Test (UUT)
@@ -42,6 +44,7 @@ begin
         wait for CLK_PERIOD;
         reset <= '0';
         wait for CLK_PERIOD;
+        -- (Agora pc_in é '0', então a primeira carga no clock será '0')
         assert(pc_out = x"00000000") report "Reset failed" severity error;
 
         -- Test loading values
@@ -54,6 +57,6 @@ begin
         assert(pc_out = x"00000008") report "PC load 2 failed" severity error;
 
         report "ProgramCounter test finished successfully.";
-        wait;
+        std.env.finish; -- <--- CORREÇÃO 1: Finalizar a simulação
     end process;
 end testbench;
