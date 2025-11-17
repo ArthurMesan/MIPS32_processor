@@ -18,33 +18,33 @@ ARCHITECTURE behavior OF tb_MIPSProcessor IS
    signal Reset : std_logic := '0';
 
    -- Clock period definitions
-   constant CLK_period : time := 10 ns; [cite: 21]
+   constant CLK_period : time := 10 ns;
 
    -- Sinal para parar o clock
-   signal stop_clock : boolean := false; [cite: 22]
+   signal stop_clock : boolean := false;
 BEGIN
 
    -- Instantiate the Unit Under Test (UUT)
    uut: MIPSProcessor PORT MAP (
           CLK => CLK,
           Reset => Reset
-        ); [cite: 23]
+        );
 
    -- Clock process definitions (agora pode parar)
-   CLK_process :process [cite: 24]
+   CLK_process :process
    begin
         if not stop_clock then
             CLK <= '0';
-            wait for CLK_period/2; [cite: 25]
+            wait for CLK_period/2;
             CLK <= '1';
             wait for CLK_period/2;
         else
-            wait; [cite: 26]
+            wait;
         end if;
    end process;
 
    -- Stimulus process
-   stim_proc: process [cite: 27]
+   stim_proc: process
    begin
 
 		Reset <= '1';
@@ -53,17 +53,17 @@ BEGIN
 
         -- --- MODIFICADO ---
         -- Deixa o processador rodar por 500ns (50 ciclos)
-        -- O original (100 ns) [cite: 28] não era suficiente
+        -- O original (100 ns) não era suficiente
         -- para testar uma instrução multi-ciclo.
 		wait for 500 ns;
 
       -- Simulação termina aqui
-      stop_clock <= true; [cite: 29]
-      wait for 1 ns; [cite: 30]
+      stop_clock <= true;
+      wait for 1 ns;
 
       -- Isso vai parar o "run -all"
       assert false report "Simulacao finalizada com sucesso."
-      severity failure; [cite: 31]
+      severity failure;
 
    end process;
 

@@ -8,14 +8,13 @@ use ieee.std_logic_unsigned.all;
 library std;
 use std.textio.all;
 library work;
-
 -- Include the full content from the generated file below
 
 --------------------------------------------------------------------------------
 --                  RightShifterSticky24_by_max_26_F400_uid4
 -- VHDL generated for Kintex7 @ 400MHz
 -- This operator is part of the Infinite Virtual Library FloPoCoLib
--- All rights reserved 
+-- All rights reserved
 -- Authors: Bogdan Pasca (2008-2011), Florent de Dinechin (2008-2019)
 --------------------------------------------------------------------------------
 -- Pipeline depth: 2 cycles
@@ -26,7 +25,8 @@ library work;
 
 entity RightShifterSticky24_by_max_26_F400_uid4 is
     port (clk : in std_logic;
-          X : in  std_logic_vector(23 downto 0);
+          X : in  std_logic_vector(23
+ downto 0);
           S : in  std_logic_vector(4 downto 0);
           R : out  std_logic_vector(25 downto 0);
           Sticky : out  std_logic   );
@@ -82,20 +82,21 @@ end architecture;
 
 --------------------------------------------------------------------------------
 --                           IntAdder_27_F400_uid6
--- VHDL generated for Kintex7 @ 400MHz
--- This operator is part of the Infinite Virtual Library FloPoCoLib
--- All rights reserved 
--- Authors: Bogdan Pasca, Florent de Dinechin (2008-2016)
 --------------------------------------------------------------------------------
--- Pipeline depth: 1 cycles
--- Clock period (ns): 2.5
--- Target frequency (MHz): 400
--- Input signals: X Y Cin
--- Output signals: R
+-- *** INÍCIO DA REPETIÇÃO DA BIBLIOTECA ***
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
+library std;
+use std.textio.all;
+library work;
+-- *** FIM DA REPETIÇÃO DA BIBLIOTECA ***
 
 entity IntAdder_27_F400_uid6 is
     port (clk : in std_logic;
-          X : in  std_logic_vector(26 downto 0);
+
+     X : in  std_logic_vector(26 downto 0);
           Y : in  std_logic_vector(26 downto 0);
           Cin : in  std_logic;
           R : out  std_logic_vector(26 downto 0)   );
@@ -131,21 +132,22 @@ end architecture;
 
 --------------------------------------------------------------------------------
 --                      Normalizer_Z_28_28_28_F400_uid8
--- VHDL generated for Kintex7 @ 400MHz
--- This operator is part of the Infinite Virtual Library FloPoCoLib
--- All rights reserved 
--- Authors: Florent de Dinechin, (2007-2020)
 --------------------------------------------------------------------------------
--- Pipeline depth: 2 cycles
--- Clock period (ns): 2.5
--- Target frequency (MHz): 400
--- Input signals: X
--- Output signals: Count R
+-- *** INÍCIO DA REPETIÇÃO DA BIBLIOTECA ***
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
+library std;
+use std.textio.all;
+library work;
+-- *** FIM DA REPETIÇÃO DA BIBLIOTECA ***
 
 entity Normalizer_Z_28_28_28_F400_uid8 is
     port (clk : in std_logic;
           X : in  std_logic_vector(27 downto 0);
-          Count : out  std_logic_vector(4 downto 0);
+
+     Count : out  std_logic_vector(4 downto 0);
           R : out  std_logic_vector(27 downto 0)   );
 end entity;
 
@@ -177,16 +179,12 @@ begin
    level5 <= X ;
    count4<= '1' when level5(27 downto 12) = (27 downto 12=>'0') else '0';
    level4<= level5(27 downto 0) when count4='0' else level5(11 downto 0) & (15 downto 0 => '0');
-
    count3<= '1' when level4_d1(27 downto 20) = (27 downto 20=>'0') else '0';
    level3<= level4_d1(27 downto 0) when count3='0' else level4_d1(19 downto 0) & (7 downto 0 => '0');
-
    count2<= '1' when level3(27 downto 24) = (27 downto 24=>'0') else '0';
    level2<= level3(27 downto 0) when count2='0' else level3(23 downto 0) & (3 downto 0 => '0');
-
    count1<= '1' when level2_d1(27 downto 26) = (27 downto 26=>'0') else '0';
    level1<= level2_d1(27 downto 0) when count1='0' else level2_d1(25 downto 0) & (1 downto 0 => '0');
-
    count0<= '1' when level1(27 downto 27) = (27 downto 27=>'0') else '0';
    level0<= level1(27 downto 0) when count0='0' else level1(26 downto 0) & (0 downto 0 => '0');
 
@@ -197,20 +195,21 @@ end architecture;
 
 --------------------------------------------------------------------------------
 --                           IntAdder_34_F400_uid11
--- VHDL generated for Kintex7 @ 400MHz
--- This operator is part of the Infinite Virtual Library FloPoCoLib
--- All rights reserved 
--- Authors: Bogdan Pasca, Florent de Dinechin (2008-2016)
 --------------------------------------------------------------------------------
--- Pipeline depth: 0 cycles
--- Clock period (ns): 2.5
--- Target frequency (MHz): 400
--- Input signals: X Y Cin
--- Output signals: R
+-- *** INÍCIO DA REPETIÇÃO DA BIBLIOTECA ***
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
+library std;
+use std.textio.all;
+library work;
+-- *** FIM DA REPETIÇÃO DA BIBLIOTECA ***
 
 entity IntAdder_34_F400_uid11 is
     port (clk : in std_logic;
-          X : in  std_logic_vector(33 downto 0);
+          X : in  std_logic_vector(33 downto
+ 0);
           Y : in  std_logic_vector(33 downto 0);
           Cin : in std_logic;
           R : out  std_logic_vector(33 downto 0)   );
@@ -238,20 +237,21 @@ end architecture;
 
 --------------------------------------------------------------------------------
 --                            FPAdd_8_23_F400_uid2
--- VHDL generated for Kintex7 @ 400MHz
--- This operator is part of the Infinite Virtual Library FloPoCoLib
--- All rights reserved 
--- Authors: Florent de Dinechin, Bogdan Pasca (2010-2017)
 --------------------------------------------------------------------------------
--- Pipeline depth: 8 cycles
--- Clock period (ns): 2.5
--- Target frequency (MHz): 400
--- Input signals: X Y
--- Output signals: R
+-- *** INÍCIO DA REPETIÇÃO DA BIBLIOTECA ***
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
+library std;
+use std.textio.all;
+library work;
+-- *** FIM DA REPETIÇÃO DA BIBLIOTECA ***
 
 entity FPAdd_8_23_F400_uid2 is
     port (clk : in std_logic;
-          X : in  std_logic_vector(8+23+2 downto 0);
+          X : in  std_logic_vector(8+23+2 downto
+ 0);
           Y : in  std_logic_vector(8+23+2 downto 0);
           R : out  std_logic_vector(8+23+2 downto 0)   );
 end entity;
@@ -408,10 +408,10 @@ begin
    sdExnXY <= excX & excY;
    fracY <= "000000000000000000000000" when excY="00" else ('1' & newY(22 downto 0));
    -- Exception management logic
-   with sXsYExnXY_d1  select  
+   with sXsYExnXY_d1  select
    excRt <= "00" when "000000"|"010000"|"100000"|"110000",
       "01" when "000101"|"010101"|"100101"|"110101"|"000100"|"010100"|"100100"|"110100"|"000001"|"010001"|"100001"|"110001",
-      "10" when "111010"|"001010"|"001000"|"011000"|"101000"|"111000"|"000010"|"010010"|"100010"|"110010"|"001001"|"011001"|"101001"|"111001"|"000110"|"010110"|"100110"|"110110", 
+      "10" when "111010"|"001010"|"001000"|"011000"|"101000"|"111000"|"000010"|"010010"|"100010"|"110010"|"001001"|"011001"|"101001"|"111001"|"000110"|"010110"|"100110"|"110110",
       "11" when others;
    signR<= '0' when (sXsYExnXY="100000" or sXsYExnXY="010000") else signX;
    shiftedOut <= '1' when (expDiff_d1 > 25) else '0';
@@ -426,14 +426,16 @@ begin
    EffSubVector <= (26 downto 0 => EffSub);
    fracYpadXorOp <= fracYpad xor EffSubVector_d1;
    fracXpad <= "01" & (newX(22 downto 0)) & "00";
-   cInSigAdd <= EffSub_d3 and not sticky; -- if we subtract and the sticky was one, some of the negated sticky bits would have absorbed this carry 
+   cInSigAdd <= EffSub_d3 and not sticky;
+   -- if we subtract and the sticky was one, some of the negated sticky bits would have absorbed this carry
    fracAdder: IntAdder_27_F400_uid6
       port map ( clk  => clk,
                  Cin => cInSigAdd,
                  X => fracXpad,
                  Y => fracYpadXorOp,
-                 R => fracAddResult);
-   fracSticky<= fracAddResult & sticky_d1; 
+
+            R => fracAddResult);
+   fracSticky<= fracAddResult & sticky_d1;
    LZCAndShifter: Normalizer_Z_28_28_28_F400_uid8
       port map ( clk  => clk,
                  X => fracSticky,
@@ -459,7 +461,7 @@ begin
    fracR <= RoundedExpFrac(23 downto 1);
    expR <= RoundedExpFrac(31 downto 24);
    exExpExc <= upExc & excRt_d6;
-   with exExpExc_d1  select  
+   with exExpExc_d1  select
    excRt2<= "00" when "0000"|"0100"|"1000"|"1100"|"1001"|"1101",
       "01" when "0001",
       "10" when "0010"|"0110"|"1010"|"1110"|"0101",
