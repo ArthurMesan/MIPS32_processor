@@ -12,32 +12,41 @@ end InstructionMemory;
 
 architecture Behavioral of InstructionMemory is
 	type Memory is array (0 to 15) of STD_LOGIC_VECTOR(31 downto 0);
-	signal IMem : Memory := (
-		 X"8C410001", -- LW $1, 1(2) --> $1 = MEM (0X02 + 0X01)
-										 -- = MEM (03) = 0X33
-		 X"00A41822", -- SUB $3, $5, $4 --> $3 = 0X05 - 0X04 = 0X01
-		 X"00E61024", -- AND $2, $7, $6 --> $2 = 0X07 AND 0X06 = 0X06
-		 X"00852025", -- OR $4, $4, $5 --> $4 = 0X04 OR 0X05 = 0X05
-		 X"00C72820", -- ADD $5, $6, $7 --> $5 = 0X06 + 0X07 = 0X0D
-		 X"1421FFFA", -- BNE $1, $1, -24 --> BRANCH NOT IF $1=$1
-		 X"1022FFFF", -- BEQ $1, $2, -4 --> BRANCH IF $1=$2
-		 X"0062302A", -- SLT $6, $3, $2 --> $6 = $3 < $2 = 0X01
-											-- = 0X01 < 0X06
-		 X"10210002", -- BEQ $1, $1, 2 --> BRANCH IF $1=$1
-		 X"00000000", -- NOP --> NOP
-		 X"00000000", -- NOP --> NOP
-		 X"AC010002", -- SW $1, 2 --> $1 = 0X33 = MEMORY(02)
-		 X"00232020", -- ADD $4, $1, $3 --> $4= 0X33 + 0X01 = 0X34
-		 X"08000000", -- JUMP 0 --> JUMP TO PC = 00
-		 X"00000000",
-		 X"00000000"
-	);
 
+    -- --- MODIFICADO: Novo programa de teste para o FloPoCo ---
+	signal IMem : Memory := (
+        -- 0: lw $t0, 0($zero)  ($t0 = Reg 8. Carrega DMem[0])
+		 X"8C080000",
+        -- 1: lw $t1, 4($zero)  ($t1 = Reg 9. Carrega DMem[1])
+		 X"8C090004",
+        -- 2: fadd $t2, $t0, $t1 (CUSTOM OPCODE 010001)
+        --    Op=010001, rs=01000($t0), rt=01001($t1), rd=01010($t2)
+        --    Esta instrução irá acionar o STALL.
+		 X"45095000",
+        -- 3: nop (Esta instrução ficará "parada" no PC+4 por 8 ciclos)
+		 X"00000000",
+        -- 4: nop
+		 X"00000000",
+        -- 5: sw $t2, 8($zero)  ($t2 = Reg 10. Salva resultado em DMem[2])
+		 X"AC0A0008",
+        -- 6: j 6 (Loop infinito)
+		 X"08000006",
+		 X"00000000", -- 7
+		 X"00000000", -- 8
+		 X"00000000", -- 9
+		 X"00000000", -- 10
+		 X"00000000", -- 11
+		 X"00000000", -- 12
+		 X"00000000", -- 13
+		 X"00000000", -- 14
+		 X"00000000"  -- 15
+	);
 begin
 
 	process (Address)
 	begin
-		Instruction <= IMem(TO_INTEGER(UNSIGNED(Address)) / 4);
+        -- Converte o endereço de byte (PC) para um índice de palavra (Memória)
+		Instruction <= IMem(TO_INTEGER(UNSIGNED(Address(5 downto 2))));
 	end process;
 
 end Behavioral;
