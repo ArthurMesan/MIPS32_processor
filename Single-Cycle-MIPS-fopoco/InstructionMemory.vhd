@@ -33,11 +33,21 @@ architecture Behavioral of InstructionMemory is
 begin
 
 	process (Address)
-        variable index : integer range 0 to 15;
+        variable index : integer;
 	begin
-        -- Converte o endereço de byte (PC) para um índice de palavra (array)
-        index := TO_INTEGER(UNSIGNED(Address(5 downto 2)));
-		Instruction <= IMem(index);
+        -- Proteção contra "X" ou "U" na simulação
+        if Is_X(Address) then
+            Instruction <= (others => '0'); -- NOP se endereço for inválido
+        else
+            -- Converte o endereço de byte (PC) para um índice de palavra
+            index := TO_INTEGER(UNSIGNED(Address(5 downto 2)));
+
+            if index >= 0 and index <= 15 then
+                Instruction <= IMem(index);
+            else
+                Instruction <= (others => '0'); -- Endereço fora da faixa
+            end if;
+        end if;
 	end process;
 
 end Behavioral;
