@@ -69,7 +69,7 @@ begin
 
     -- 2. Execução
     -- Esperamos um pouco mais (600ns) pois o pipeline + stalls da FPU levam tempo
-    wait for 600 ns;
+    wait for 2000 ns;
 
     stop_clock <= true;
     wait for 1 ns;

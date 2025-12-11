@@ -5,8 +5,9 @@ entity PipeReg_EX_MEM is
     port (
         CLK          : in  STD_LOGIC;
         Reset        : in  STD_LOGIC;
+        En           : in  STD_LOGIC; -- ADICIONADO: Enable para Stall
 
-        -- Controle (Sobrarm apenas WB e MEM)
+        -- Controle
         RegWrite_In  : in STD_LOGIC;
         MemtoReg_In  : in STD_LOGIC;
         MemRead_In   : in STD_LOGIC;
@@ -14,8 +15,8 @@ entity PipeReg_EX_MEM is
 
         -- Dados
         ALUResult_In : in STD_LOGIC_VECTOR(31 downto 0);
-        WriteData_In : in STD_LOGIC_VECTOR(31 downto 0); -- Dado para Store (vem do ReadData2 do ID/EX)
-        WriteReg_In  : in STD_LOGIC_VECTOR(4 downto 0);  -- Destino já escolhido (rd ou rt)
+        WriteData_In : in STD_LOGIC_VECTOR(31 downto 0);
+        WriteReg_In  : in STD_LOGIC_VECTOR(4 downto 0);
 
         -- Saídas
         RegWrite_Out : out STD_LOGIC;
@@ -36,15 +37,22 @@ begin
         if Reset = '1' then
             RegWrite_Out <= '0'; MemWrite_Out <= '0';
             ALUResult_Out <= (others => '0');
+            -- Resetar outros sinais para evitar lixo
+            MemtoReg_Out <= '0'; MemRead_Out <= '0';
+            WriteData_Out <= (others => '0'); WriteReg_Out <= (others => '0');
+            
         elsif rising_edge(CLK) then
-            RegWrite_Out <= RegWrite_In;
-            MemtoReg_Out <= MemtoReg_In;
-            MemRead_Out  <= MemRead_In;
-            MemWrite_Out <= MemWrite_In;
+            -- Só atualiza se En = '1'
+            if En = '1' then
+                RegWrite_Out <= RegWrite_In;
+                MemtoReg_Out <= MemtoReg_In;
+                MemRead_Out  <= MemRead_In;
+                MemWrite_Out <= MemWrite_In;
 
-            ALUResult_Out <= ALUResult_In;
-            WriteData_Out <= WriteData_In;
-            WriteReg_Out  <= WriteReg_In;
+                ALUResult_Out <= ALUResult_In;
+                WriteData_Out <= WriteData_In;
+                WriteReg_Out  <= WriteReg_In;
+            end if;
         end if;
     end process;
 end Behavioral;

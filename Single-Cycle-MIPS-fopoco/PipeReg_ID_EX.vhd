@@ -6,21 +6,21 @@ entity PipeReg_ID_EX is
         CLK          : in  STD_LOGIC;
         Reset        : in  STD_LOGIC;
         En           : in  STD_LOGIC; -- Porta Essencial para o Stall
-
+        
         -- Controle
         RegWrite_In, MemtoReg_In, MemRead_In, MemWrite_In, ALUSrc_In, RegDst_In : in STD_LOGIC;
         ALUOp_In     : in STD_LOGIC_VECTOR(1 downto 0);
-        isFP_In      : in STD_LOGIC;
-
+        isFP_In      : in STD_LOGIC; 
+        
         -- Dados
         PC4_In, ReadData1_In, ReadData2_In, SignExt_In : in STD_LOGIC_VECTOR(31 downto 0);
         RS_In, RT_In, RD_In : in STD_LOGIC_VECTOR(4 downto 0);
-
+        
         -- Saídas
         RegWrite_Out, MemtoReg_Out, MemRead_Out, MemWrite_Out, ALUSrc_Out, RegDst_Out : out STD_LOGIC;
         ALUOp_Out    : out STD_LOGIC_VECTOR(1 downto 0);
         isFP_Out     : out STD_LOGIC;
-
+        
         PC4_Out, ReadData1_Out, ReadData2_Out, SignExt_Out : out STD_LOGIC_VECTOR(31 downto 0);
         RS_Out, RT_Out, RD_Out : out STD_LOGIC_VECTOR(4 downto 0)
     );
@@ -37,7 +37,7 @@ begin
             PC4_Out <= (others => '0'); ReadData1_Out <= (others => '0');
             ReadData2_Out <= (others => '0'); SignExt_Out <= (others => '0');
             RS_Out <= (others => '0'); RT_Out <= (others => '0'); RD_Out <= (others => '0');
-
+            
         elsif rising_edge(CLK) then
             if En = '1' then -- Só atualiza se não estiver em Stall
                 RegWrite_Out <= RegWrite_In; MemtoReg_Out <= MemtoReg_In;

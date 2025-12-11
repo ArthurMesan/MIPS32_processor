@@ -38,7 +38,7 @@ begin
 
             -- ADICIONADO: Floating Point (COP1 - Opcode 011111)
             -- FADD.S, FMUL.S, etc. se comportam como R-Type para o pipeline
-            when "011111" =>
+            when "011111" => 
                 RegDst    <= '1'; -- Destino é rd (bits 15-11)
                 Jump      <= '0';
                 Branch_E  <= '0';
@@ -105,7 +105,7 @@ begin
                 MemWrite  <= '0';
                 ALUSrc    <= '0';
                 RegWrite  <= '0';
-            when others =>
+            when others => 
                 RegDst    <= '0';
                 Jump      <= '0';
                 Branch_E  <= '0';

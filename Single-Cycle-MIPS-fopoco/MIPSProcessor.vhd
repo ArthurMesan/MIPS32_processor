@@ -15,45 +15,37 @@ end MIPSProcessor;
 
 architecture Behavioral of MIPSProcessor is
 
-    -- COMPONENTES BÁSICOS
+    -- COMPONENTES (Declarações simplificadas para brevidade, mantenha as suas completas se preferir)
     component ProgramCounter is port (CLK, Reset : in STD_LOGIC; PC_in : in STD_LOGIC_VECTOR(31 downto 0); PC_out : out STD_LOGIC_VECTOR(31 downto 0)); end component;
     component ProgramCounterAdder is port (PCA_in : in STD_LOGIC_VECTOR(31 downto 0); PCA_out : out STD_LOGIC_VECTOR(31 downto 0)); end component;
     component InstructionMemory is port (Address : in STD_LOGIC_VECTOR(31 downto 0); Instruction : out STD_LOGIC_VECTOR(31 downto 0)); end component;
-
-    component ControlUnit is
-        port (
-          Opcode : in STD_LOGIC_VECTOR(5 downto 0);
-          RegDst, Jump, Branch_E, Branch_NE, MemRead, MemtoReg : out STD_LOGIC;
-          ALUOp : out STD_LOGIC_VECTOR(1 downto 0);
-          MemWrite, ALUSrc, RegWrite : out STD_LOGIC
-        );
-    end component;
-
+    component ControlUnit is port (Opcode : in STD_LOGIC_VECTOR(5 downto 0); RegDst, Jump, Branch_E, Branch_NE, MemRead, MemtoReg, MemWrite, ALUSrc, RegWrite : out STD_LOGIC; ALUOp : out STD_LOGIC_VECTOR(1 downto 0)); end component;
     component RegisterFile is port (CLK, RegWrite : in STD_LOGIC; Read_Register_1, Read_Register_2, Write_Register : in STD_LOGIC_VECTOR(4 downto 0); Write_Data : in STD_LOGIC_VECTOR(31 downto 0); Read_Data_1, Read_Data_2 : out STD_LOGIC_VECTOR(31 downto 0)); end component;
     component SignExtender is port (SE_in : in STD_LOGIC_VECTOR(15 downto 0); SE_out : out STD_LOGIC_VECTOR(31 downto 0)); end component;
     component Multiplexer is generic (N : integer := 32); port (MUX_in_0, MUX_in_1 : in STD_LOGIC_VECTOR(N - 1 downto 0); MUX_select : in STD_LOGIC; MUX_out : out STD_LOGIC_VECTOR(N - 1 downto 0)); end component;
     component ArithmeticLogicUnitControl is port (ALUC_funct : in STD_LOGIC_VECTOR(5 downto 0); ALUOp : in STD_LOGIC_VECTOR(1 downto 0); ALUC_operation : out STD_LOGIC_VECTOR(3 downto 0)); end component;
     component ArithmeticLogicUnit is port (Input_1, Input_2 : in STD_LOGIC_VECTOR(31 downto 0); ALU_control : in STD_LOGIC_VECTOR(3 downto 0); ALU_result : out STD_LOGIC_VECTOR(31 downto 0); Zero : out STD_LOGIC); end component;
-    component DataMemory is port (CLK : in STD_LOGIC; Address, Write_Data : in STD_LOGIC_VECTOR(31 downto 0); MemRead, MemWrite : in STD_LOGIC; Read_Data : out STD_LOGIC_VECTOR(31 downto 0)); end component;
     component ShiftLefter is generic (N : integer := 2; W : integer := 32); port (SL_in  : in STD_LOGIC_VECTOR(W - 1 downto 0); SL_out : out STD_LOGIC_VECTOR(W - 1 downto 0)); end component;
 
-    -- COMPONENTES HAZARD E PIPELINE
-    component HazardUnit is port (Rs_E, Rt_E, WriteReg_M, WriteReg_W : in STD_LOGIC_VECTOR(4 downto 0); RegWrite_M, RegWrite_W, fp_busy : in STD_LOGIC; ForwardAE, ForwardBE : out STD_LOGIC_VECTOR(1 downto 0); Stall_F, Stall_D, Stall_E, Flush_E : out STD_LOGIC); end component;
+    -- HAZARD UNIT (COM FPU START)
+    component HazardUnit is port (Rs_E, Rt_E, WriteReg_M, WriteReg_W : in STD_LOGIC_VECTOR(4 downto 0); RegWrite_M, RegWrite_W, fp_busy, mem_busy, fpu_start : in STD_LOGIC; ForwardAE, ForwardBE : out STD_LOGIC_VECTOR(1 downto 0); Stall_F, Stall_D, Stall_E, Stall_M, Flush_E : out STD_LOGIC); end component;
+
     component FPAdd32_wrapper is port (CLK, Start : in STD_LOGIC; A, B : in STD_LOGIC_VECTOR(31 downto 0); R : out STD_LOGIC_VECTOR(31 downto 0); Ready : out STD_LOGIC); end component;
     component FPMult32_wrapper is port (CLK, Start : in STD_LOGIC; A, B : in STD_LOGIC_VECTOR(31 downto 0); R : out STD_LOGIC_VECTOR(31 downto 0); Ready : out STD_LOGIC); end component;
+    component DataMemoryCache is port (CLK, Reset : in STD_LOGIC; Address, Write_Data : in STD_LOGIC_VECTOR(31 downto 0); MemRead, MemWrite : in STD_LOGIC; Read_Data : out STD_LOGIC_VECTOR(31 downto 0); MemBusy : out STD_LOGIC); end component;
 
+    -- REGISTRADORES
     component PipeReg_IF_ID is port (CLK, Reset, En, Flush : in STD_LOGIC; PC4_In, Instr_In : in STD_LOGIC_VECTOR(31 downto 0); PC4_Out, Instr_Out : out STD_LOGIC_VECTOR(31 downto 0)); end component;
     component PipeReg_ID_EX is port (CLK, Reset, En : in STD_LOGIC; RegWrite_In, MemtoReg_In, MemRead_In, MemWrite_In, ALUSrc_In, RegDst_In : in STD_LOGIC; ALUOp_In : in STD_LOGIC_VECTOR(1 downto 0); isFP_In : in STD_LOGIC; PC4_In, ReadData1_In, ReadData2_In, SignExt_In : in STD_LOGIC_VECTOR(31 downto 0); RS_In, RT_In, RD_In : in STD_LOGIC_VECTOR(4 downto 0); RegWrite_Out, MemtoReg_Out, MemRead_Out, MemWrite_Out, ALUSrc_Out, RegDst_Out : out STD_LOGIC; ALUOp_Out : out STD_LOGIC_VECTOR(1 downto 0); isFP_Out : out STD_LOGIC; PC4_Out, ReadData1_Out, ReadData2_Out, SignExt_Out : out STD_LOGIC_VECTOR(31 downto 0); RS_Out, RT_Out, RD_Out : out STD_LOGIC_VECTOR(4 downto 0)); end component;
-    component PipeReg_EX_MEM is port (CLK, Reset : in STD_LOGIC; RegWrite_In, MemtoReg_In, MemRead_In, MemWrite_In : in STD_LOGIC; ALUResult_In, WriteData_In : in STD_LOGIC_VECTOR(31 downto 0); WriteReg_In : in STD_LOGIC_VECTOR(4 downto 0); RegWrite_Out, MemtoReg_Out, MemRead_Out, MemWrite_Out : out STD_LOGIC; ALUResult_Out, WriteData_Out : out STD_LOGIC_VECTOR(31 downto 0); WriteReg_Out : out STD_LOGIC_VECTOR(4 downto 0)); end component;
-    component PipeReg_MEM_WB is port (CLK, Reset : in STD_LOGIC; RegWrite_In, MemtoReg_In : in STD_LOGIC; ReadData_In, ALUResult_In : in STD_LOGIC_VECTOR(31 downto 0); WriteReg_In : in STD_LOGIC_VECTOR(4 downto 0); RegWrite_Out, MemtoReg_Out : out STD_LOGIC; ReadData_Out, ALUResult_Out : out STD_LOGIC_VECTOR(31 downto 0); WriteReg_Out : out STD_LOGIC_VECTOR(4 downto 0)); end component;
+    component PipeReg_EX_MEM is port (CLK, Reset, En : in STD_LOGIC; RegWrite_In, MemtoReg_In, MemRead_In, MemWrite_In : in STD_LOGIC; ALUResult_In, WriteData_In : in STD_LOGIC_VECTOR(31 downto 0); WriteReg_In : in STD_LOGIC_VECTOR(4 downto 0); RegWrite_Out, MemtoReg_Out, MemRead_Out, MemWrite_Out : out STD_LOGIC; ALUResult_Out, WriteData_Out : out STD_LOGIC_VECTOR(31 downto 0); WriteReg_Out : out STD_LOGIC_VECTOR(4 downto 0)); end component;
+    component PipeReg_MEM_WB is port (CLK, Reset, En : in STD_LOGIC; RegWrite_In, MemtoReg_In : in STD_LOGIC; ReadData_In, ALUResult_In : in STD_LOGIC_VECTOR(31 downto 0); WriteReg_In : in STD_LOGIC_VECTOR(4 downto 0); RegWrite_Out, MemtoReg_Out : out STD_LOGIC; ReadData_Out, ALUResult_Out : out STD_LOGIC_VECTOR(31 downto 0); WriteReg_Out : out STD_LOGIC_VECTOR(4 downto 0)); end component;
 
     -- SINAIS
     signal pc_current, pc_next, pc_plus4_F, instr_F : STD_LOGIC_VECTOR(31 downto 0);
-    signal stall_F, stall_D, stall_E, flush_E : STD_LOGIC;
+    signal stall_F, stall_D, stall_E, stall_M, flush_E : STD_LOGIC;
 
-    -- Sinais Auxiliares
-    signal reset_ID_EX : STD_LOGIC;
-    signal if_id_en, id_ex_en : STD_LOGIC;
+    signal reset_ID_EX, if_id_en, id_ex_en, ex_mem_en, mem_wb_en : STD_LOGIC;
+    signal mem_busy : STD_LOGIC;
 
     -- ID Stage
     signal instr_D, pc_plus4_D : STD_LOGIC_VECTOR(31 downto 0);
@@ -73,15 +65,17 @@ architecture Behavioral of MIPSProcessor is
     signal alu_ctrl_E : STD_LOGIC_VECTOR(3 downto 0);
     signal forward_ae, forward_be : STD_LOGIC_VECTOR(1 downto 0);
 
-    -- FP Logic
     signal fp_start_add, fp_start_mul, fp_ready_add, fp_ready_mul, fp_busy, fp_current_is_add : STD_LOGIC := '0';
     signal fp_result_add, fp_result_mul, fp_result_E : STD_LOGIC_VECTOR(31 downto 0);
-    signal fp_done : STD_LOGIC := '0'; -- O Sinal "Matador" de instruções repetidas
+    signal fp_done, fpu_start_signal : STD_LOGIC := '0';
 
-    -- MEM & WB Signals
+    -- MEM Stage
     signal regwrite_M, memtoreg_M, memread_M, memwrite_M : STD_LOGIC;
     signal alu_result_M, write_data_M, read_data_M : STD_LOGIC_VECTOR(31 downto 0);
     signal write_reg_M : STD_LOGIC_VECTOR(4 downto 0);
+    signal forward_data_M : STD_LOGIC_VECTOR(31 downto 0);
+
+    -- WB Stage
     signal regwrite_W, memtoreg_W : STD_LOGIC;
     signal read_data_W, alu_result_W, result_W : STD_LOGIC_VECTOR(31 downto 0);
     signal write_reg_W : STD_LOGIC_VECTOR(4 downto 0);
@@ -89,13 +83,18 @@ architecture Behavioral of MIPSProcessor is
 
 begin
 
+    -- Sinal combinado de Start (para enviar à Hazard Unit)
+    fpu_start_signal <= fp_start_add or fp_start_mul;
+
     HU: HazardUnit port map (
         Rs_E => rs_E, Rt_E => rt_E,
         WriteReg_M => write_reg_M, WriteReg_W => write_reg_W,
         RegWrite_M => regwrite_M, RegWrite_W => regwrite_W,
-        fp_busy => fp_busy,
+        fp_busy => fp_busy, mem_busy => mem_busy,
+        fpu_start => fpu_start_signal, -- CONECTADO
         ForwardAE => forward_ae, ForwardBE => forward_be,
-        Stall_F => stall_F, Stall_D => stall_D, Stall_E => stall_E, Flush_E => flush_E
+        Stall_F => stall_F, Stall_D => stall_D, Stall_E => stall_E, Stall_M => stall_M,
+        Flush_E => flush_E
     );
 
     -- IF STAGE
@@ -128,9 +127,7 @@ begin
     RF : RegisterFile port map(CLK, regwrite_W, rs_D, rt_D, write_reg_W, result_W, read_data1_D, read_data2_D);
     SE : SignExtender port map(imm_D, sign_ext_D);
 
-    -- *** CORREÇÃO VITAL: RESETAR ID/EX SE FPU TERMINOU (fp_done) ***
     reset_ID_EX <= Reset or flush_E or fp_done;
-
     id_ex_en <= not stall_E;
 
     Reg_ID_EX : PipeReg_ID_EX port map(
@@ -146,50 +143,54 @@ begin
     );
 
     -- EX STAGE
-    alu_src_a_E <= read_data1_E when forward_ae = "00" else result_W when forward_ae = "01" else alu_result_M;
-    alu_src_b_temp <= read_data2_E when forward_be = "00" else result_W when forward_be = "01" else alu_result_M;
+    forward_data_M <= read_data_M when memtoreg_M = '1' else alu_result_M;
+
+    alu_src_a_E <= read_data1_E   when forward_ae = "00" else
+                   result_W       when forward_ae = "01" else
+                   forward_data_M;
+
+    alu_src_b_temp <= read_data2_E   when forward_be = "00" else
+                      result_W       when forward_be = "01" else
+                      forward_data_M;
+
     alu_src_b_E <= alu_src_b_temp when alusrc_E = '0' else sign_ext_E;
 
     ALU_Ctrl : ArithmeticLogicUnitControl port map(sign_ext_E(5 downto 0), aluop_E, alu_ctrl_E);
     Main_ALU : ArithmeticLogicUnit port map(alu_src_a_E, alu_src_b_E, alu_ctrl_E, alu_result_E, open);
 
-    -- FPU Start Logic
-    fp_start_add <= '1' when (isFP_E='1' and sign_ext_E(5 downto 0)="000000" and fp_busy='0') else '0';
-    fp_start_mul <= '1' when (isFP_E='1' and sign_ext_E(5 downto 0)="000010" and fp_busy='0') else '0';
+    fp_start_add <= '1' when (isFP_E='1' and sign_ext_E(5 downto 0)="000000" and fp_busy='0' and mem_busy='0') else '0';
+    fp_start_mul <= '1' when (isFP_E='1' and sign_ext_E(5 downto 0)="000010" and fp_busy='0' and mem_busy='0') else '0';
 
     FPADD : FPAdd32_wrapper port map (CLK, fp_start_add, alu_src_a_E, alu_src_b_temp, fp_result_add, fp_ready_add);
     FPMUL : FPMult32_wrapper port map (CLK, fp_start_mul, alu_src_a_E, alu_src_b_temp, fp_result_mul, fp_ready_mul);
 
-    -- FSM de Controle da FPU Atualizada
     process(CLK, Reset)
     begin
         if Reset = '1' then
             fp_busy <= '0'; fp_current_is_add <= '0'; fp_done <= '0';
         elsif rising_edge(CLK) then
-            fp_done <= '0'; -- Default: fp_done é um pulso de 1 ciclo
-
+            fp_done <= '0';
             if fp_busy = '0' then
                 if fp_start_add = '1' then fp_busy <= '1'; fp_current_is_add <= '1';
                 elsif fp_start_mul = '1' then fp_busy <= '1'; fp_current_is_add <= '0';
                 end if;
             else
-                -- Quando termina, liberamos o busy E ativamos o done
                 if (fp_current_is_add = '1' and fp_ready_add = '1') or (fp_current_is_add = '0' and fp_ready_mul = '1') then
                     fp_busy <= '0';
-                    fp_done <= '1'; -- Isso vai limpar o ID/EX no próximo ciclo
+                    fp_done <= '1';
                 end if;
             end if;
         end if;
     end process;
 
     fp_result_E <= fp_result_add when fp_current_is_add='1' else fp_result_mul;
-
     Mux_RegDst : Multiplexer generic map(5) port map(rt_E, rd_E, regdst_E, write_reg_E);
-
     alu_res_in_ex_mem <= fp_result_E when isFP_E='1' else alu_result_E;
 
+    ex_mem_en <= not stall_M;
+
     Reg_EX_MEM : PipeReg_EX_MEM port map(
-        CLK => CLK, Reset => Reset,
+        CLK => CLK, Reset => Reset, En => ex_mem_en,
         RegWrite_In => regwrite_E, MemtoReg_In => memtoreg_E, MemRead_In => memread_E, MemWrite_In => memwrite_E,
         ALUResult_In => alu_res_in_ex_mem,
         WriteData_In => alu_src_b_temp, WriteReg_In => write_reg_E,
@@ -197,11 +198,18 @@ begin
         ALUResult_Out => alu_result_M, WriteData_Out => write_data_M, WriteReg_Out => write_reg_M
     );
 
-    -- MEM STAGE
-    DM : DataMemory port map(CLK, alu_result_M, write_data_M, memread_M, memwrite_M, read_data_M);
+    -- MEM STAGE (CACHE)
+    DM_Cache : DataMemoryCache port map(
+        CLK => CLK, Reset => Reset,
+        Address => alu_result_M, Write_Data => write_data_M,
+        MemRead => memread_M, MemWrite => memwrite_M,
+        Read_Data => read_data_M, MemBusy => mem_busy
+    );
+
+    mem_wb_en <= not stall_M;
 
     Reg_MEM_WB : PipeReg_MEM_WB port map(
-        CLK => CLK, Reset => Reset,
+        CLK => CLK, Reset => Reset, En => mem_wb_en,
         RegWrite_In => regwrite_M, MemtoReg_In => memtoreg_M,
         ReadData_In => read_data_M, ALUResult_In => alu_result_M, WriteReg_In => write_reg_M,
         RegWrite_Out => regwrite_W, MemtoReg_Out => memtoreg_W,
